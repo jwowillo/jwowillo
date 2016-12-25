@@ -2,7 +2,7 @@
 
 trim is a web framework based on decorators.
 
-<center>![Turkey Leg]({{ cdn }}/trim/leg.png)</center>
+<center>![Turkey Leg](http://{{ cdn }}/trim/leg.png)</center>
 
 Making an API which tells a user the length of their name and that caches
 responses is simple using trim. Three main components will be needed: a

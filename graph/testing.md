@@ -57,7 +57,7 @@ Graph examples below describe graphs using a syntax like to the one described.
 
 Complete graph on four vertices, or K<sub>4</sub>.
 
-![Complete Graph]({{ cdn }}/graphs/complete_graph.png)
+![Complete Graph]({{ static }}/graphs/complete_graph.png)
 
 Adjacencies:
 
@@ -79,7 +79,7 @@ Adjacency Matrix:
 
 Empty graph with two vertices and no edges.
 
-![Empty Graph]({{ cdn }}/graphs/empty_graph.png)
+![Empty Graph]({{ static }}/graphs/empty_graph.png)
 
 Adjacencies:
 
@@ -97,7 +97,7 @@ Adjacency Matrix:
 
 Graph with one vertex attached to C<sub>4.
 
-![Isolated Vertex Graph]({{ cdn }}/graphs/isolated_vertex_graph.png)
+![Isolated Vertex Graph]({{ static }}/graphs/isolated_vertex_graph.png)
 
 Adjacencies:
 
@@ -121,7 +121,7 @@ Adjacency Matrix:
 
 Non simple graph with a loop.
 
-![Loop Graph]({{ cdn }}/graphs/loop_graph.png)
+![Loop Graph]({{ static }}/graphs/loop_graph.png)
 
 Adjacencies:
 
@@ -139,7 +139,7 @@ Adjacency Matrix:
 
 Graph with parallel edges between two vertices.
 
-![Parallel Graph]({{ cdn }}/graphs/parallel_graph.png)
+![Parallel Graph]({{ static }}/graphs/parallel_graph.png)
 
 Adjacencies:
 
@@ -157,7 +157,7 @@ Adjacency Matrix:
 
 Directed graph where not all vertices are reachable from other vertices.
 
-![Unconnected Directed Graph]({{ cdn }}/graphs/unconnected_directed_graph.png)
+![Unconnected Directed Graph]({{ static }}/graphs/unconnected_directed_graph.png)
 
 Adjacency Matrix:
 

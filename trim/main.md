@@ -8,7 +8,7 @@
 trim is a golang web framework which simplifies application by maximizing
 reuse, testability, and power while minimizing boilerplate and magic.
 
-<center>![Turkey Leg](http://{{ cdn }}/trim/leg.png)</center>
+<center>![Turkey Leg](http://{{ static }}/trim/leg.png)</center>
 
 ### Overview
 
@@ -85,7 +85,7 @@ func (c *EchoController) Handle(r *trim.Request) trim.Response {
 trim's core architecture is marked by Server and Application separation,
 nestable Applications, and Trimmed types.
 
-<center>![Architecture](http://{{ cdn }}/trim/arch.png)</center>
+<center>![Architecture](http://{{ static }}/trim/arch.png)</center>
 
 Shown in the diagram, trim serves Applications through very loosely coupled
 Servers. Servers can provide access to Application's without any knowledge of

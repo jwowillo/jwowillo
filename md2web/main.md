@@ -19,7 +19,7 @@ optionally specified port.
 By default, md2web serves markdown files based on the folder structure they
 exist in. Static files can be included in the markdown files by linking to files
 in a folder called `static` with the link
-`http://cdn.<domain>.<tld>/<file>`. The favicon served can be set by placing a
+`http://static.<domain>.<tld>/<file>`. The favicon served can be set by placing a
 file at `static/favicon.png`. To customize HTML injected into different sections
 of the site, files can be placed into folders at `static/head`, `static/header`,
 `static/nav`, `static/aside`, and `static/section`. These will be prepended to

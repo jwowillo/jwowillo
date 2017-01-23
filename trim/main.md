@@ -1,139 +1,131 @@
 ## trim
 
-trim is a web framework based on decorators.
+* Tutorial: https://godoc.org/github.com/jwowillo/trim/tutorial
+* Examples: https://godoc.org/github.com/jwowillo/trim/examples
+* API Documentation: https://godoc.org/github.com/jwowillo/trim
+* Repository: https://github.com/jwowillo/trim
+
+trim is a golang web framework which simplifies application by maximizing
+reuse, testability, and power while minimizing boilerplate and magic.
 
 <center>![Turkey Leg](http://{{ cdn }}/trim/leg.png)</center>
 
-Making an API which tells a user the length of their name and that caches
-responses is simple using trim. Three main components will be needed: a
-Controller, an Application, and a Server. Along with these, Decorators will
-be applied.
+### Overview
 
-These three components correspond to different parts of a URL. For example, if a
-URL has structure \<subdomain\>.\<domain\>.\<tld\>/\<path\>, the Server maps to
-the entire URL, Applications match to subdomains, and Controllers map to paths.
+trim is a powerful web application framework due to several design features:
 
-The Controller can be implemented like
+* Trimmings
+* Responses
+* Application and Controller separation
+* Nestable Applications
+* Default implementations
+
+These allow web application to look like:
 
 ```
 package main
 
-import (
-	"net/http"
-	"time"
-
-	"github.com/jwowillo/trim"
-	"github.com/jwowillo/decorators"
-	"github.com/jwowillo/responses"
-)
-
-// LengthController is a trim.Controller which returns the lengths of names
-// sent in trim.Requests.
-type LengthController struct {
-	trim.Decorated // Embedding trim.Decorated means no
-                       // trim.Decoratable::AddDecorator method needs to be
-                       // added.
-}
-
-// NewLengthController creates a LengthController.
-type NewLengthController() *LengthController {
-	return &LengthController{}
-}
-
-// Decorators is a list of a single trim.Decorator which caches trim.Responses
-// for an hour at a time.
+// main serves the Echo web application.
 //
-// This way, if someone asks how long their name is and that name has already
-// been seen, the trim.Request doesn't need to be rehandled.
-func (c *LengthController) Decorators() []trim.Decorator {
-	return []trim.Decorator{decorators.CacheDecorator(time.Hour)}
+// Since the premade application.Web is used, the client, API, and static file
+// serving are separated at different subdomains. The client also will cache by
+// default and serve a template file. The API will have ping and schema
+// controllers already added and will package response from other controllers.
+// The Static allows static files to also be templated.
+func main() {
+	// Assume these are read in from somewhere else.
+	var (
+		domain string
+		port int
+	)
+	web := application.NewWebWithConfig(
+		// Custom Client configuration allows home template to exist at
+		// project root.
+		application.ClientConfig{
+			ClientTemplateHome: "index.html",
+			// Inject the name of the web application into the
+			// template so that it can be dynamically changed.
+			Args: func(r *trim.Request) trim.AnyMap {
+				return trim.AnyMap{"name": "Echo Client"}
+			},
+		},
+		application.APIDefault, application.StaticDefault,
+	)
+	web.API().AddController(NewEchoController())
+	trim.NewServer(domain, port).Serve(web.Application)
 }
 
-// Path the controller is located at.
-//
-// <name> matches any string after the first /. It is placed at key "name" in
-// the trim.Request's PathArguments.
-func (c *LengthController) Path() string {
-	return "/<name>"
+// EchoController echos strings to a name.
+type EchoController struct {}
+
+// NewEchoController creates an EchoController.
+func NewEchoController() *EchoController { return &EchoController{} }
+
+// Path matches a single name to be echoed to.
+func (c *EchoController) Path() string { return "/:name" }
+
+// Trimmings only allows GET requests.
+func (c *EchoController) Trimmings() []trim.Trimming {
+	return []trim.Trimming{trimmings.NewAllow([]string{"GET"})}
 }
 
-// Handle the trim.Request by returning a JSON trim.Response containing the
-// length of the passed name.
-func (c *LengthController) Handle(r *trim.Request) trim.Response {
-	name := r.PathArguments()["name"]
-	return responses.NewPackagedJSONResponse(
-		responses.AnyMap{"length": len(name)},
-		http.StatusOK,
+// Handle the request by parsing the name and string to echo from the request
+// and returning a message to the user.
+func (c *EchoController) Handle(r *trim.Request) trim.Response {
+	msg := fmt.Sprintf("%s: %s", r.URLArg("name"), r.FormArg("string"))
+	return response.NewJSON(
+		trim.AnyMap{"message": msg},
+		trim.Code(http.StatusOK),
 	)
 }
 ```
 
-The Controller then needs to added to an Application. This one will be located
-at subdomain "api".
+### Architecture
 
-```
-import "github.com/jwowillo/handlers"
+trim's core architecture is marked by Server and Application separation,
+nestable Applications, and Trimmed types.
 
-// Application containing a LengthController located at "api".
-//
-// Returns a JSON trim.Response for 404s instead of an HTML trim.Response.
-func Application() *trim.Application {
-	app := trim.NewApplication("api")
-	app.AddController(NewLengthController())
-	app.SetHandle404(handlers.HandleJSON404)
-	return app
-}
-```
+<center>![Architecture](http://{{ cdn }}/trim/arch.png)</center>
 
-Finally, the Application needs to be added to a Server. This will be located
-at namelength.com.
+Shown in the diagram, trim serves Applications through very loosely coupled
+Servers. Servers can provide access to Application's without any knowledge of
+the specific Application. Applications represent a tree of functionality groups
+accessbile through subdomains and base paths. An Application has its own
+functionalities and also has child Applications which have their own
+functionalities. These functionalities are provided through the Application's
+Controllers. Controllers are simply Handlers with an associated path.
+Applications also have Handler's for error situations.
 
-```
-// Server containing the API trim.Application.
-//
-// Expects to be run at namelength.com.
-func Server() *trim.Server {
-	server := trim.NewServer("namelength.com")
-	server.AddApplication(Application())
-	return server
-}
-```
+Application's and Handlers are Trimmed types. This means that decorator
+functionality can be added to them to change behavior without convoluting
+Application and Handler logic through Trimmings. The Trimmings are instantiated
+and listed and the Request handling process correctly wraps the functionalities
+around the Trimmed types.
 
-Running the Server is simple with the above steps completed.
+Request handling is a process which first involves the Server receiving a
+communication and using a RequestBuilder to build a Request from it. The Server
+then asks the Application for a Response to the built Request. To satisfy this,
+the Appilcation finds the correct Handler for the Request by navigating the
+Application and Controller tree. If errors happen during the process, the
+Application chooses the correct error Handler. Once the correct Handler is
+found, it is wrapped with the correct Trimmings and the Response is retrieved.
+The Application then returns the Response to the Server.
 
-```
-// main runs the namelength.com web server.
-func main() {
-	Server().Run(80) // Listen on port 80.
-}
-```
+trim provides several customizable types. All of these are interfaces which can
+be satisfied except Application. All customizable types have default
+implementations in subpackages named after themselves. The types are:
 
-Assuming the above is located in a file called server.go, it can be ran with
-`go run server.go`.
+* Application: Custom Applications already have Trimmings and Controllers
+  attached and can be attached to other Applications or run from Servers.
+* Trimming: Custom Trimmings provide a functionality that would normally be
+  included in a Controller but is not related to the actual logic of the
+  Controller.
+* Controller: Custom Controllers allow functionalities to be delivered by the
+  web Application.
+* Handler: Custom Handlers help decide the proper behavior in error situations
+  or special circumstances.
+* Response: Custom Responses allow more specialized and powerfulr messages to be
+  delivered back to the client which made the Request.
 
-Requests can then be made like
-
-```
-$ curl -i "api.namelength.com/jim"
-
-HTTP/1.1 200 OK
-Access-Control-Allow-Origin: *
-Content-Type: application/json
-Date: Sun, 25 Sep 2016 13:49:48 GMT
-Content-Length: 21
-
-{"data":{"length":3}}
-
-$ curl -i "api.namelength.com/joseph"
-
-HTTP/1.1 200 OK
-Access-Control-Allow-Origin: *
-Content-Type: application/json
-Date: Sun, 25 Sep 2016 13:49:48 GMT
-Content-Length: 21
-
-{"data":{"length":6}}
-```
-
-The framework has many other features and details which are described in the
-rest of the documentation.
+More detailed discussions and more types are discussed in the API documentation,
+examples, and tutorial.

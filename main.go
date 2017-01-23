@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -10,29 +11,39 @@ import (
 )
 
 var (
-	// Domain the trim.Server runs at.
-	Domain = "localhost"
-	// Port the trim.Server runs at.
-	Port = 5000
+	// host the trim.Server runs at.
+	host string
+	// port the trim.Server runs at.
+	port int
 )
 
-// main runs the server on the given domain and port.
+// main runs the server on the given host and port.
 func main() {
-	app := md2web.New([]string{"README.md"}).Application
-	trim.NewServer(Domain, Port).Serve(app)
+	var app *md2web.MD2Web
+	ignores := []string{"README.md"}
+	h := host
+	if port == 80 {
+		app = md2web.New(h, ignores)
+	} else {
+		if host == "localhost" || port != 80 {
+			h += fmt.Sprintf(":%d", port)
+		}
+		app = md2web.NewDebug(h, ignores)
+	}
+	trim.NewServer(host, port).Serve(app.Application)
 }
 
-// init parses the domain and port.
+// init parses the host and port.
 func init() {
-	message := []byte("Usage: jwowillo <domain> <port:int>\n")
+	message := "Usage: jwowillo <host> <port:int>\n"
 	if len(os.Args) != 3 {
 		log.Fatal(message)
 	}
-	Domain = os.Args[1]
+	host = os.Args[1]
 	portArg := os.Args[2]
 	portVal, err := strconv.Atoi(portArg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	Port = portVal
+	port = portVal
 }

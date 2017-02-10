@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/jwowillo/md2web"
-	"github.com/jwowillo/trim"
+	"github.com/jwowillo/trim/server"
 )
 
 var (
@@ -30,7 +30,7 @@ func main() {
 		}
 		app = md2web.NewDebug(h, ignores)
 	}
-	trim.NewServer(host, port).Serve(app.Application)
+	server.New(host, port).Serve(app)
 }
 
 // init parses the host and port.

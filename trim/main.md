@@ -1,6 +1,5 @@
 ## trim
 
-* Tutorial: https://godoc.org/github.com/jwowillo/trim/tutorial
 * Examples: https://godoc.org/github.com/jwowillo/trim/examples
 * API Documentation: https://godoc.org/github.com/jwowillo/trim
 * Repository: https://github.com/jwowillo/trim

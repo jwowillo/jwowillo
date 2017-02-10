@@ -1,19 +1,27 @@
+// Package main allows multiple trim.Applications to be joined to a
+// documentation trim.Application.
+//
+// trim.Applications are defined by a mapping of repository URL to
+// trim.Application constructor that accepts subdomain and static folder
+// arguments. Static folders are expected to be attached to the repository's
+// root in a folder called 'static' if they exist and Makefiles are expected to
+// be in the same place and named 'Makefile' if they exist.
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
-	"os"
-	"strconv"
+	"sync"
 
 	"github.com/jwowillo/md2web"
 	"github.com/jwowillo/trim/server"
 )
 
 var (
-	// host the trim.Server runs at.
+	// host to run at.
 	host string
-	// port the trim.Server runs at.
+	// port to run at.
 	port int
 )
 
@@ -30,20 +38,36 @@ func main() {
 		}
 		app = md2web.NewDebug(h, ignores)
 	}
-	server.New(host, port).Serve(app)
+	var wg sync.WaitGroup
+	for repo, constructor := range projects {
+		fmt.Println("Adding Application at", repo)
+		if err := app.AddApplication(constructor(
+			projectName(repo),
+			h,
+			staticFolder(repo),
+		)); err != nil {
+			log.Fatal(err)
+		}
+		wg.Add(1)
+		go func() {
+			fmt.Println("Downloading repository at", repo)
+			if err := buildRepo(repo); err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println("Done downloading repository at", repo)
+			wg.Done()
+		}()
+
+	}
+	wg.Wait()
+	s := server.New(host, port)
+	s.AddHeader("Access-Control-Allow-Origin", "*")
+	s.Serve(app)
 }
 
 // init parses the host and port.
 func init() {
-	message := "Usage: jwowillo <host> <port:int>\n"
-	if len(os.Args) != 3 {
-		log.Fatal(message)
-	}
-	host = os.Args[1]
-	portArg := os.Args[2]
-	portVal, err := strconv.Atoi(portArg)
-	if err != nil {
-		log.Fatal(err)
-	}
-	port = portVal
+	flag.StringVar(&host, "host", "localhost", "host to run on")
+	flag.IntVar(&port, "port", 5000, "port to run on")
+	flag.Parse()
 }

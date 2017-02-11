@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 // staticFolderPrefix is the prefix to prepend static folders with.
@@ -47,19 +48,27 @@ func hasMakefile(repo string) bool {
 
 // build the repo by runnings its Makefile.
 func build(repo string) error {
+	m := sync.Mutex{}
+	m.Lock()
 	wd, err := os.Getwd()
 	if err != nil {
+		m.Unlock()
 		return err
 	}
 	if err = os.Chdir(repoFolder(repo)); err != nil {
+		m.Unlock()
 		return err
 	}
+	m.Unlock()
 	if err = run("make"); err != nil {
 		return err
 	}
+	m.Lock()
 	if err = os.Chdir(wd); err != nil {
+		m.Unlock()
 		return err
 	}
+	m.Unlock()
 	return nil
 }
 

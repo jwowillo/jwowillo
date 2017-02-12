@@ -12,6 +12,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"sync"
 
 	"github.com/jwowillo/md2web"
@@ -38,6 +39,10 @@ func main() {
 		}
 		app = md2web.NewDebug(h, ignores)
 	}
+	root, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
 	var wg sync.WaitGroup
 	for repo, constructor := range projects {
 		fmt.Println("Adding Application at", repo)
@@ -45,24 +50,24 @@ func main() {
 			projectName(repo),
 			h,
 			staticFolder(repo),
-		)); err != nil {
+		).Application); err != nil {
 			log.Fatal(err)
 		}
 		wg.Add(1)
-		go func() {
-			fmt.Println("Downloading repository at", repo)
-			if err := buildRepo(repo); err != nil {
+		go func(r string) {
+			fmt.Println("Downloading repository at", r)
+			if err := buildRepo(root, r); err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println("Done downloading repository at", repo)
+			fmt.Println("Done downloading repository at", r)
 			wg.Done()
-		}()
+		}(repo)
 
 	}
 	wg.Wait()
 	s := server.New(host, port)
 	s.AddHeader("Access-Control-Allow-Origin", "*")
-	s.Serve(app)
+	s.Serve(app.Application)
 }
 
 // init parses the host and port.

@@ -9,19 +9,25 @@ import (
 	"sync"
 )
 
+var m = sync.Mutex{}
+
 // staticFolderPrefix is the prefix to prepend static folders with.
 const staticFolderPrefix = "static"
 
 // buildRepo at the provided Github URL.
-func buildRepo(repo string) error {
+func buildRepo(root, repo string) error {
+	m.Lock()
 	if err := downloadRepo(repo); err != nil {
 		return err
 	}
 	if hasMakefile(repo) {
-		if err := build(repo); err != nil {
+		m.Unlock()
+		if err := build(root, repo); err != nil {
 			return err
 		}
+		m.Lock()
 	}
+	m.Unlock()
 	return nil
 }
 
@@ -31,15 +37,27 @@ func downloadRepo(repo string) error {
 		return err
 	}
 	if err := run(fmt.Sprintf(
+		"chmod -R 777 %s",
+		staticFolderPrefix,
+	)); err != nil {
+		return err
+	}
+	if err := run(fmt.Sprintf(
 		"git clone %s %s",
 		repoURL(repo), repoFolder(repo),
+	)); err != nil {
+		return err
+	}
+	if err := run(fmt.Sprintf(
+		"chmod -R 777 %s",
+		staticFolderPrefix,
 	)); err != nil {
 		return err
 	}
 	return nil
 }
 
-// hasMakefile returns true if the repo has a Makefile..
+// hasMakefile returns true if the repo has a Makefile.
 func hasMakefile(repo string) bool {
 	path := filepath.Join(repoFolder(repo), "Makefile")
 	_, err := os.Stat(path)
@@ -47,24 +65,18 @@ func hasMakefile(repo string) bool {
 }
 
 // build the repo by runnings its Makefile.
-func build(repo string) error {
-	m := sync.Mutex{}
+func build(root, repo string) error {
 	m.Lock()
-	wd, err := os.Getwd()
-	if err != nil {
-		m.Unlock()
-		return err
-	}
-	if err = os.Chdir(repoFolder(repo)); err != nil {
+	if err := os.Chdir(repoFolder(repo)); err != nil {
 		m.Unlock()
 		return err
 	}
 	m.Unlock()
-	if err = run("make"); err != nil {
+	if err := run("make"); err != nil {
 		return err
 	}
 	m.Lock()
-	if err = os.Chdir(wd); err != nil {
+	if err := os.Chdir(root); err != nil {
 		m.Unlock()
 		return err
 	}

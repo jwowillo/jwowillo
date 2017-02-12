@@ -2,7 +2,8 @@ package main
 
 import (
 	"github.com/jwowillo/harvester"
-	"github.com/jwowillo/trim"
+	"github.com/jwowillo/sample"
+	"github.com/jwowillo/trim/application"
 )
 
 // projects is a mapping from Github repository URLs in go repository format
@@ -12,6 +13,7 @@ import (
 // after the project's Githup repository.
 var projects = map[string]applicationConstructor{
 	"github.com/jwowillo/harvester": harvester.New,
+	"github.com/jwowillo/sample":    sample.New,
 }
 
 // applicationConstructor constructs a trim.Application which expects to exist
@@ -19,4 +21,4 @@ var projects = map[string]applicationConstructor{
 // given static folder.
 type applicationConstructor func(
 	subdomain, host, staticFolder string,
-) trim.Application
+) *application.Web

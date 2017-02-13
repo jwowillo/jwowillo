@@ -14,7 +14,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"sync"
 
 	"github.com/jwowillo/md2web"
 	"github.com/jwowillo/trim/server"
@@ -44,32 +43,26 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var wg sync.WaitGroup
 	for repo, constructor := range projects {
 		fmt.Println("Adding Application at", repo)
 		sf := filepath.Join(
 			staticFolder(repo),
-			constructor.StaticPathSuffix,
+			"dist",
 		)
-		if err := app.AddApplication(constructor.ApplicationConstructor(
+		if err := app.AddApplication(constructor(
 			projectName(repo),
 			h,
 			sf,
 		).Application); err != nil {
 			log.Fatal(err)
 		}
-		wg.Add(1)
-		go func(r string) {
-			fmt.Println("Downloading repository at", r)
-			if err := buildRepo(root, r); err != nil {
-				log.Fatal(err)
-			}
-			fmt.Println("Done downloading repository at", r)
-			wg.Done()
-		}(repo)
+		fmt.Println("Downloading repository at", repo)
+		if err := buildRepo(root, repo); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Done downloading repository at", repo)
 
 	}
-	wg.Wait()
 	s := server.New(host, port)
 	s.AddHeader("Access-Control-Allow-Origin", "*")
 	s.Serve(app.Application)

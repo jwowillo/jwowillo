@@ -6,28 +6,21 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"sync"
 )
-
-var m = sync.Mutex{}
 
 // staticFolderPrefix is the prefix to prepend static folders with.
 const staticFolderPrefix = "static"
 
 // buildRepo at the provided Github URL.
 func buildRepo(root, repo string) error {
-	m.Lock()
 	if err := downloadRepo(repo); err != nil {
 		return err
 	}
 	if hasMakefile(repo) {
-		m.Unlock()
 		if err := build(root, repo); err != nil {
 			return err
 		}
-		m.Lock()
 	}
-	m.Unlock()
 	return nil
 }
 
@@ -64,23 +57,19 @@ func hasMakefile(repo string) bool {
 	return err == nil
 }
 
-// build the repo by runnings its Makefile.
+// build the repo by running its Makefile.
+//
+// Expects Makefile to have production target.
 func build(root, repo string) error {
-	m.Lock()
 	if err := os.Chdir(repoFolder(repo)); err != nil {
-		m.Unlock()
 		return err
 	}
-	m.Unlock()
-	if err := run("make"); err != nil {
+	if err := run("make production"); err != nil {
 		return err
 	}
-	m.Lock()
 	if err := os.Chdir(root); err != nil {
-		m.Unlock()
 		return err
 	}
-	m.Unlock()
 	return nil
 }
 

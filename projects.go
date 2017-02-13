@@ -11,9 +11,14 @@ import (
 //
 // These will be attached to the main trim.Application at a subdomain named
 // after the project's Githup repository.
-var projects = map[string]applicationConstructor{
-	"github.com/jwowillo/harvester": harvester.New,
-	"github.com/jwowillo/sample":    sample.New,
+var projects = map[string]constructor{
+	"github.com/jwowillo/harvester": constructor{
+		ApplicationConstructor: harvester.New,
+	},
+	"github.com/jwowillo/sample": constructor{
+		ApplicationConstructor: sample.New,
+		StaticPathSuffix:       "dist",
+	},
 }
 
 // applicationConstructor constructs a trim.Application which expects to exist
@@ -22,3 +27,8 @@ var projects = map[string]applicationConstructor{
 type applicationConstructor func(
 	subdomain, host, staticFolder string,
 ) *application.Web
+
+type constructor struct {
+	ApplicationConstructor applicationConstructor
+	StaticPathSuffix       string
+}

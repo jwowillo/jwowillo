@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/jwowillo/md2web"
@@ -46,10 +47,14 @@ func main() {
 	var wg sync.WaitGroup
 	for repo, constructor := range projects {
 		fmt.Println("Adding Application at", repo)
-		if err := app.AddApplication(constructor(
+		sf := filepath.Join(
+			staticFolder(repo),
+			constructor.StaticPathSuffix,
+		)
+		if err := app.AddApplication(constructor.ApplicationConstructor(
 			projectName(repo),
 			h,
-			staticFolder(repo),
+			sf,
 		).Application); err != nil {
 			log.Fatal(err)
 		}

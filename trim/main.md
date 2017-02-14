@@ -1,5 +1,9 @@
 ## trim
 
+DESCRIPTION
+ARCHITECTURE
+TUTORIAL GOES HERE AND REPLACES ECHO THING
+
 * Examples: https://godoc.org/github.com/jwowillo/trim/examples
 * API Documentation: https://godoc.org/github.com/jwowillo/trim
 * Repository: https://github.com/jwowillo/trim
@@ -44,8 +48,8 @@ func main() {
 			ClientTemplateHome: "index.html",
 			// Inject the name of the web application into the
 			// template so that it can be dynamically changed.
-			Args: func(r *trim.Request) trim.AnyMap {
-				return trim.AnyMap{"name": "Echo Client"}
+			Args: func(r *trim.Request) pack.AnyMap {
+				return pack.AnyMap{"name": "Echo Client"}
 			},
 		},
 		application.APIDefault, application.StaticDefault,
@@ -73,7 +77,7 @@ func (c *EchoController) Trimmings() []trim.Trimming {
 func (c *EchoController) Handle(r *trim.Request) trim.Response {
 	msg := fmt.Sprintf("%s: %s", r.URLArg("name"), r.FormArg("string"))
 	return response.NewJSON(
-		trim.AnyMap{"message": msg},
+		pack.AnyMap{"message": msg},
 		trim.Code(http.StatusOK),
 	)
 }

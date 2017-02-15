@@ -1,4 +1,4 @@
-package main
+package project
 
 import (
 	"fmt"
@@ -6,13 +6,22 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/jwowillo/trim/application"
 )
 
-// staticFolderPrefix is the prefix to prepend static folders with.
-const staticFolderPrefix = "static"
+// StaticFolder returns the path to the repo's static folder.
+func StaticFolder(repo string) string {
+	return filepath.Join(repoFolder(repo), staticFolderPrefix)
+}
 
-// buildRepo at the provided Github URL.
-func buildRepo(root, repo string) error {
+// Name of a repo.
+func Name(repo string) string {
+	return filepath.Base(repo)
+}
+
+// BuildRepo at the provided Github URL.
+func BuildRepo(root, repo string) error {
 	if err := downloadRepo(repo); err != nil {
 		return err
 	}
@@ -23,6 +32,14 @@ func buildRepo(root, repo string) error {
 	}
 	return nil
 }
+
+// Constructor constructs a trim.Application which expects to exist
+// at the given subdomain and host and have its static files located in the
+// given static folder.
+type Constructor func(subdomain, host, staticFolder string) *application.Web
+
+// staticFolderPrefix is the prefix to prepend static folders with.
+const staticFolderPrefix = "static"
 
 // downloadRepo at the provided Github URL.
 func downloadRepo(repo string) error {
@@ -73,11 +90,6 @@ func build(root, repo string) error {
 	return nil
 }
 
-// projectName of a repo.
-func projectName(repo string) string {
-	return filepath.Base(repo)
-}
-
 // repoURL returns the URL the repo can be downloaded from.
 func repoURL(repo string) string {
 	return "https://" + repo + ".git"
@@ -86,11 +98,6 @@ func repoURL(repo string) string {
 // repoFolder returns the path to the repo.
 func repoFolder(repo string) string {
 	return filepath.Join(staticFolderPrefix, repo)
-}
-
-// staticFolder returns the path to the repo's static folder.
-func staticFolder(repo string) string {
-	return filepath.Join(repoFolder(repo), staticFolderPrefix)
 }
 
 // run the command.

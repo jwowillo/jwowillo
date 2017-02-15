@@ -39,11 +39,21 @@ func main() {
 		}
 		app = md2web.NewDebug(h, ignores)
 	}
+	s := server.New(host, port)
+	s.AddHeader("Access-Control-Allow-Origin", "*")
+	go func() {
+		s.Serve(app.Application)
+	}()
 	root, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
 	}
 	for repo, constructor := range projects {
+		fmt.Println("Downloading repository at", repo)
+		if err := buildRepo(root, repo); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Done downloading repository at", repo)
 		fmt.Println("Adding Application at", repo)
 		sf := filepath.Join(
 			staticFolder(repo),
@@ -56,16 +66,10 @@ func main() {
 		).Application); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println("Downloading repository at", repo)
-		if err := buildRepo(root, repo); err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("Done downloading repository at", repo)
-
 	}
-	s := server.New(host, port)
-	s.AddHeader("Access-Control-Allow-Origin", "*")
-	s.Serve(app.Application)
+	fmt.Println("Done adding applications")
+	for {
+	}
 }
 
 // init parses the host and port.

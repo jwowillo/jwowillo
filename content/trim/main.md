@@ -1,134 +1,75 @@
-## trim
+# trim
 
-DESCRIPTION
-ARCHITECTURE
-TUTORIAL GOES HERE AND REPLACES ECHO THING
+* [API Documentation and Examples](https://godoc.org/github.com/jwowillo/trim)
+* [Source](https://github.com/jwowillo/trim)
 
-* Examples: https://godoc.org/github.com/jwowillo/trim/examples
-* API Documentation: https://godoc.org/github.com/jwowillo/trim
-* Repository: https://github.com/jwowillo/trim
+<center>![Turkey Leg]({{ static }}/trim/leg.png)</center>
 
-trim is a golang web framework which simplifies application by maximizing
-reuse, testability, and power while minimizing boilerplate and magic.
-
-<center>![Turkey Leg](http://{{ static }}/trim/leg.png)</center>
-
-### Overview
-
-trim is a powerful web application framework due to several design features:
-
-* Trimmings
-* Responses
-* Application and Controller separation
-* Nestable Applications
-* Default implementations
-
-These allow web application to look like:
+`trim` is a web application framework which allows for efficient development by
+removing boilerplate and providing commonly used functionality.
 
 ```
-package main
+func HelloWorld(_ *request.Request) response.Response {
+	return response.NewPlainText(
+		response.Body("Hello World"),
+		response.CodeOK,
+	)
+}
 
-// main serves the Echo web application.
-//
-// Since the premade application.Web is used, the client, API, and static file
-// serving are separated at different subdomains. The client also will cache by
-// default and serve a template file. The API will have ping and schema
-// controllers already added and will package response from other controllers.
-// The Static allows static files to also be templated.
 func main() {
-	// Assume these are read in from somewhere else.
-	var (
-		domain string
-		port int
-	)
-	web := application.NewWebWithConfig(
-		// Custom Client configuration allows home template to exist at
-		// project root.
-		application.ClientConfig{
-			ClientTemplateHome: "index.html",
-			// Inject the name of the web application into the
-			// template so that it can be dynamically changed.
-			Args: func(r *trim.Request) pack.AnyMap {
-				return pack.AnyMap{"name": "Echo Client"}
-			},
-		},
-		application.APIDefault, application.StaticDefault,
-	)
-	web.API().AddController(NewEchoController())
-	trim.NewServer(domain, port).Serve(web.Application)
-}
-
-// EchoController echos strings to a name.
-type EchoController struct {}
-
-// NewEchoController creates an EchoController.
-func NewEchoController() *EchoController { return &EchoController{} }
-
-// Path matches a single name to be echoed to.
-func (c *EchoController) Path() string { return "/:name" }
-
-// Trimmings only allows GET requests.
-func (c *EchoController) Trimmings() []trim.Trimming {
-	return []trim.Trimming{trimmings.NewAllow([]string{"GET"})}
-}
-
-// Handle the request by parsing the name and string to echo from the request
-// and returning a message to the user.
-func (c *EchoController) Handle(r *trim.Request) trim.Response {
-	msg := fmt.Sprintf("%s: %s", r.URLArg("name"), r.FormArg("string"))
-	return response.NewJSON(
-		pack.AnyMap{"message": msg},
-		trim.Code(http.StatusOK),
-	)
+	app := application.New()
+	app.AddController(controller.NewFunc("/", handler.NewFunc(HelloWorld)))
+	server.New(host, port).Serve(app)
 }
 ```
 
-### Architecture
+## Overview
 
-trim's core architecture is marked by Server and Application separation,
-nestable Applications, and Trimmed types.
+`trim` works by removing unrelated logic from applications through the use of
+"tirmmings". Trimmings are decorators which wrap a specific piece of
+functionality in other necessary, but not directly associted, functionality. For
+example, a piece of functionality that returns an expensive operation could have
+a cache trimming which remembers results. Caching isn't directly related to the
+expensive operation but is good to have for avoiding recomputation.
 
-<center>![Architecture](http://{{ static }}/trim/arch.png)</center>
+This concept is extended through the entire framework. For example, application
+nesting is made easy in `trim`. Applications are groups of related functionality
+that exist at a subdomain or base path and are organized into a tree structure.
+Trimmings applied to an application in the tree affect all child applications
+and controllers. At a small level, a trimming which only allows GET requests
+could be applied to a static file serving application which will force all
+attached controllers to only allow GET requests. At a higher level, a context
+injecting trimming could be applied to the root application, injecting a context
+into every application and controller below it.
 
-Shown in the diagram, trim serves Applications through very loosely coupled
-Servers. Servers can provide access to Application's without any knowledge of
-the specific Application. Applications represent a tree of functionality groups
-accessbile through subdomains and base paths. An Application has its own
-functionalities and also has child Applications which have their own
-functionalities. These functionalities are provided through the Application's
-Controllers. Controllers are simply Handlers with an associated path.
-Applications also have Handler's for error situations.
+Trimmings allow the repetitive tasks of web development to be easily separated
+and refactored into their own specific functionality. These trimmings can then
+by more broadly applied. The actual code of substance is also more effectively
+able to convey its purpose without the unrelated logic. Premade trimmings can
+also be easily provided allowing the functionality to be written once in a
+library and used anywhere.
 
-Application's and Handlers are Trimmed types. This means that decorator
-functionality can be added to them to change behavior without convoluting
-Application and Handler logic through Trimmings. The Trimmings are instantiated
-and listed and the Request handling process correctly wraps the functionalities
-around the Trimmed types.
+## Architecture
 
-Request handling is a process which first involves the Server receiving a
-communication and using a RequestBuilder to build a Request from it. The Server
-then asks the Application for a Response to the built Request. To satisfy this,
-the Appilcation finds the correct Handler for the Request by navigating the
-Application and Controller tree. If errors happen during the process, the
-Application chooses the correct error Handler. Once the correct Handler is
-found, it is wrapped with the correct Trimmings and the Response is retrieved.
-The Application then returns the Response to the Server.
+`trim` is organized into several modular packages, including:
 
-trim provides several customizable types. All of these are interfaces which can
-be satisfied except Application. All customizable types have default
-implementations in subpackages named after themselves. The types are:
+* url
+* request
+* response
+* handler
+* trimming
+* controller
+* application
+* server
+* logger
 
-* Application: Custom Applications already have Trimmings and Controllers
-  attached and can be attached to other Applications or run from Servers.
-* Trimming: Custom Trimmings provide a functionality that would normally be
-  included in a Controller but is not related to the actual logic of the
-  Controller.
-* Controller: Custom Controllers allow functionalities to be delivered by the
-  web Application.
-* Handler: Custom Handlers help decide the proper behavior in error situations
-  or special circumstances.
-* Response: Custom Responses allow more specialized and powerfulr messages to be
-  delivered back to the client which made the Request.
+Each of these serves a specific purpose and is documented in the links above.
+The packages interact with eachother according to the below diagram:
 
-More detailed discussions and more types are discussed in the API documentation,
-examples, and tutorial.
+This shows that, from the top down, servers serve applications. These
+applications are composed of other applications and have associated controllers. 
+Applications and controllers can have trimmings which apply to the entire
+application subtree. Controllers are handlers with associated paths. Specific
+applications and controllers are requested through urls. The server uses loggers
+to log interactions, which are composed or a request to a controller and the
+controller's response. A model of the structure of the framework is:

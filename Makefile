@@ -1,3 +1,3 @@
 all:
-	cd build_jwowillo && go get -u all && go install
-	cd run_jwowillo && go get -u all && go install
+	cd build_jwowillo && go install
+	cd run_jwowillo && go install

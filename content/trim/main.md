@@ -5,7 +5,7 @@
 
 <center>![Turkey Leg]({{ static }}/trim/leg.png)</center>
 
-`trim` is a web application framework which allows for efficient development by
+`trim` is a web application framework which allows efficient development by
 removing boilerplate and providing commonly used functionality.
 
 ```
@@ -23,7 +23,7 @@ func main() {
 }
 ```
 
-## Overview
+## Description
 
 `trim` works by removing unrelated logic from applications through the use of
 "tirmmings". Trimmings are decorators which wrap a specific piece of

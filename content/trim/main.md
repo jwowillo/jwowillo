@@ -26,7 +26,7 @@ func main() {
 ## Description
 
 `trim` works by removing unrelated logic from applications through the use of
-"tirmmings". Trimmings are decorators which wrap a specific piece of
+"trimmings". Trimmings are decorators which wrap a specific piece of
 functionality in other necessary, but not directly associted, functionality. For
 example, a piece of functionality that returns an expensive operation could have
 a cache trimming which remembers results. Caching isn't directly related to the

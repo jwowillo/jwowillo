@@ -9,6 +9,8 @@ way to add extra functionality to any `handler.Handler` without having to change
 or manipulate the actual `handler.Handler` logic. Imagine a `Trimming` working
 like the diagram:
 
+<center>![Diagram]({{ static }}/trim/packages/trimming.png)</center>
+
 The `handler.Handler` is the base functionality provided in the inner black box.
 It already has an input and output. The `Trimming` sits in front of the black
 box's input and output and imitates its interface. The input and output are

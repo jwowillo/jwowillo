@@ -5,8 +5,8 @@
 
 <center>![Turkey Leg]({{ static }}/trim/leg.png)</center>
 
-`trim` is a web application framework which allows efficient development by
-removing boilerplate and providing commonly used functionality.
+Package `trim` is a web application framework which allows efficient development
+by removing boilerplate and providing commonly used functionality.
 
 ```
 func HelloWorld(_ *request.Request) response.Response {
@@ -53,15 +53,15 @@ library and used anywhere.
 
 `trim` is organized into several modular packages, including:
 
-* url
-* request
-* response
-* handler
-* trimming
-* controller
-* application
-* server
-* logger
+* `url`
+* `request`
+* `response`
+* `handler`
+* `trimming`
+* `controller`
+* `application`
+* `server`
+* `logger`
 
 Each of these serves a specific purpose and is documented in the links above.
 The packages interact with eachother according to the below diagram:

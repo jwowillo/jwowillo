@@ -43,7 +43,7 @@ func main() {
 	}
 	s := server.New(host, port)
 	s.AddHeader("Access-Control-Allow-Origin", "*")
-	s.Serve(app.Application)
+	s.Serve(app)
 }
 
 // init parses the host and port.

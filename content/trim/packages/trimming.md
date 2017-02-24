@@ -4,26 +4,25 @@ API Documentation and Examples: https://godoc.org/github.com/jwowillo/trim/trimm
 
 ## Description
 
-Package `trimming` consists of implementations of `Trimming`s. A `Trimming` is a
-way to add extra functionality to any `handler.Handler` without having to change
-or manipulate the actual `handler.Handler` logic. Imagine a `Trimming` working
-like the diagram:
+Package `trimming` consists of implementations of `trim.Trimming`s. A
+`trim.Trimming` is a way to add extra functionality to any `trim.Handler`
+without having to change or manipulate the actual `trim.Handler` logic. Imagine
+a `trim.Trimming` working like the diagram:
 
 <center>![Diagram]({{ static }}/trim/packages/trimming.png)</center>
 
-The `handler.Handler` is the base functionality provided in the inner black box.
-It already has an input and output. The `Trimming` sits in front of the black
-box's input and output and imitates its interface. The input and output are
-manipulated by the `Trimming`.
+The `trim.Handler` is the base functionality provided in the inner black box.
+It already has an input and output. The `trim.Trimming` sits in front of the
+black box's input and output and imitates its interface. The input and output
+are manipulated by the `trim.Trimming`.
 
-Since `Trimming`s pretend to be `handler.Handler`s, the extend the
-`handler.Handler` interface and provided their own interface method,
-`Apply(handler.Handler)`. This method substitutes the `trimming.Trimming`s black
+Since `trim.Trimming`s pretend to be `trim.Handler`s, they extend the
+`trim.Handler` interface and provide their own interface method,
+`Apply(trim.Handler)`. This method substitutes the `trim.Trimming`s black
 box for a new one.
 
-Any type which has `Trimming`s is called `Trimmed`. This interface has a single
-method with signature `Trimmings() []Trimming` which returns all the `Trimming`s
-on a `Trimmed` type.
+Any type which has `trim.Trimming`s is called `trim.Trimmed`. This interface has
+a single method with signature `Trimmings() []trim.Trimming` which returns all
+the `trim.Trimming`s on a `trim.Trimmed` type.
 
-The package also consists of several `Trimming` implementations documented at
-the linked "API Documentation and Examples".
+The package contains implementations of several `trim.Trimming`.

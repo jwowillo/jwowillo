@@ -65,10 +65,11 @@ Each of these implements an interface or extends a type defined in the `trim`
 package. The interaction of these interfaces and types is explained according to
 the digram:
 
-This shows that, from the top down, servers serve applications. These
-applications have associated Controllers. Applications and Controllers can have
-Trimmings which apply to all of the Application's Controllers or just the
-Controller itself. Controllers are Handlers with associated paths. Specific
-Applications and Controllers are requested through url.Urls. The Server uses
-Loggers to log interactions which are composed or a Request to a Handler and
-the Handler's response. A model of the structure of the framework is:
+This shows that, from the top down, `Server`s serve `Application`s. These
+`Application`s have associated `Controller`s. `Application`s and `Controller`s
+can have `Trimming`s which apply to all of the `Application`'s `Controller`s or
+just the `Controller` itself. `Controller`s are `Handler`s with associated
+paths. Specific `Application`s and `Controller`s are requested through
+`trim.URLs`. The `Server` uses `Logger`s to log interactions which are composed
+of a `Request` to a `Handler` and the `Handler`'s `Response`. A model of the
+structure of the framework is:

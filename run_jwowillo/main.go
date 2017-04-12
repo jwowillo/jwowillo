@@ -35,8 +35,8 @@ func main() {
 		if err := app.AddApplication(constructor(
 			project.Name(repo),
 			h,
-			filepath.Join(project.StaticFolder(repo), "dist"),
-		).Application); err != nil {
+			filepath.Join(project.StaticFolder(repo), "app", "build", "web"),
+		)); err != nil {
 			log.Fatal(err)
 		}
 

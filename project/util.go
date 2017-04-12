@@ -12,7 +12,7 @@ import (
 
 // StaticFolder returns the path to the repo's static folder.
 func StaticFolder(repo string) string {
-	return filepath.Join(repoFolder(repo), staticFolderPrefix)
+	return filepath.Join(repoFolder(repo))
 }
 
 // Name of a repo.
@@ -36,7 +36,7 @@ func BuildRepo(root, repo string) error {
 // Constructor constructs a trim.Application which expects to exist
 // at the given subdomain and host and have its static files located in the
 // given static folder.
-type Constructor func(subdomain, host, staticFolder string) *application.Web
+type Constructor func(subdomain, host, staticFolder string) *application.Application
 
 // staticFolderPrefix is the prefix to prepend static folders with.
 const staticFolderPrefix = "static"
@@ -81,7 +81,7 @@ func build(root, repo string) error {
 	if err := os.Chdir(repoFolder(repo)); err != nil {
 		return err
 	}
-	if err := run("make production"); err != nil {
+	if err := run("make run_web"); err != nil {
 		return err
 	}
 	if err := os.Chdir(root); err != nil {

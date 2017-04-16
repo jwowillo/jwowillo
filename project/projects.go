@@ -1,6 +1,6 @@
 package project
 
-import landgrab "github.com/jwowillo/landgrab/app/web"
+import landgrab "github.com/jwowillo/landgrab/web"
 
 // Map is a mapping from Github repository URLs in go repository format
 // style to trim.Application constructors for a web project.

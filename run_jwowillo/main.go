@@ -43,6 +43,7 @@ func main() {
 	}
 	s := server.New(host, port)
 	s.AddHeader("Access-Control-Allow-Origin", "*")
+	s.AddHeader("Access-Control-Allow-Headers", "Authorization")
 	s.Serve(app)
 }
 

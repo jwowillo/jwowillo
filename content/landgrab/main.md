@@ -9,13 +9,17 @@ import requests
 
 
 APP = flask.Flask(__name__)
-RESOURCE = 'http://api.landgrab.jwowillo.com/moves'
+API = 'http://api.landgrab.jwowillo.com'
 
 
 @APP.route('/')
 def play():
     state = flask.request.args.get('state')
-    resp = requests.get(url=RESOURCE+'?state='+state).json()['data']
+    token = requests.get(url=API+'/token').json()['data']['token']
+    resp = requests.get(
+        url=API+'/moves?state='+state,
+        headers={'Authorization': token}
+    ).json()['data']
     play = [random.choice(ms) for ms in resp.values()]
     return flask.jsonify({'data': {'moves': play}})
 ```

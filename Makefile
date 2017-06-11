@@ -1,3 +1,2 @@
 all:
-	cd build_jwowillo && go install
-	cd run_jwowillo && go install
+	cd cmd/jwowillo_run_web && go install

@@ -6,16 +6,24 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/jwowillo/jwowillo/project"
 	"github.com/jwowillo/md2web"
+	"github.com/jwowillo/trim/application"
 	"github.com/jwowillo/trim/server"
+
+	landgrab "github.com/jwowillo/landgrab/web"
 )
+
+// Constructor ...
+type Constructor func(string, string, string) *application.Application
 
 var (
 	// host to run at.
 	host string
 	// port to run at.
-	port int
+	port     int
+	projects = map[string]Constructor{
+		"landgrab": landgrab.New,
+	}
 )
 
 // main runs the server on the given host and port.
@@ -31,11 +39,11 @@ func main() {
 		}
 		app = md2web.NewDebug(h, "content", ignores)
 	}
-	for repo, constructor := range project.Map {
+	for name, constructor := range projects {
 		if err := app.AddApplication(constructor(
-			project.Name(repo),
+			name,
 			h,
-			filepath.Join(project.StaticFolder(repo), "build", "web"),
+			filepath.Join("build_"+name, "web"),
 		)); err != nil {
 			log.Fatal(err)
 		}

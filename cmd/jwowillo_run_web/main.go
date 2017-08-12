@@ -17,8 +17,8 @@ import (
 type Constructor func(string, string, string) *application.Application
 
 var (
-	// host to run at.
-	host string
+	// url to run at.
+	url string
 	// port to run at.
 	port     int
 	projects = map[string]Constructor{
@@ -26,15 +26,15 @@ var (
 	}
 )
 
-// main runs the server on the given host and port.
+// main runs the server on the given URL and port.
 func main() {
 	var app *md2web.MD2Web
 	ignores := []string{"README.md"}
-	h := host
+	h := url
 	if port == 80 {
 		app = md2web.New(h, "content", ignores)
 	} else {
-		if host == "localhost" || port != 80 {
+		if url == "localhost" || port != 80 {
 			h += fmt.Sprintf(":%d", port)
 		}
 		app = md2web.NewDebug(h, "content", ignores)
@@ -49,15 +49,15 @@ func main() {
 		}
 
 	}
-	s := server.New(host, port)
+	s := server.New(url, port)
 	s.AddHeader("Access-Control-Allow-Origin", "*")
 	s.AddHeader("Access-Control-Allow-Headers", "Authorization")
 	s.Serve(app)
 }
 
-// init parses the host and port.
+// init parses the URL and port.
 func init() {
-	flag.StringVar(&host, "host", "localhost", "host to run on")
+	flag.StringVar(&url, "url", "localhost", "URL to listen from")
 	flag.IntVar(&port, "port", 5000, "port to run on")
 	flag.Parse()
 }

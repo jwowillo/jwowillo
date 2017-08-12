@@ -18,4 +18,4 @@ Run `make`.
 
 ## Running
 
-Run `jwowillo`. The command accepts optional flags `--host` and `--port`.
+Run `jwowillo`. The command accepts optional flags `--url` and `--port`.
